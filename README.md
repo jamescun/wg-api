@@ -198,3 +198,9 @@ RemovePeer deletes a Peer from the WireGuard interfaces table by their public ke
 ```sh
 curl http://localhost:8080 -H "Content-Type: application/json" -d '{"jsonrpc": "2.0", "method": "RemovePeer", "params": {"public_key": "xoY2MZZ1UmbEakFBPyqryHwTaMi6ae4myP+vuILmJUY="}}'
 ```
+
+## Thanks
+
+With many thanks to:
+
+  - [Jason A. Donenfeld](https://github.com/zx2c4)
