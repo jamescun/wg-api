@@ -1,6 +1,6 @@
-# WireGuard-API 🔐
+# WG-API 🔐
 
-WireGuard-API presents a JSON-RPC interface on top of a WireGuard network interface.
+WG-API presents a JSON-RPC interface on top of a WireGuard network interface.
 
 * 💖 **Add/Remove Peers**
   Modify known peers without reloading
@@ -11,47 +11,47 @@ WireGuard-API presents a JSON-RPC interface on top of a WireGuard network interf
 * 📞 **JSON-RPC 2.0 API**
   No custom client integrations required, standard API accepted everywhere.
 
-**NOTE:** WireGuard-API is currently only compatible with the WireGuard Linux kernel module and userland wireguard-go. It does not currently work with the MacOS NetworkExtension.
+**NOTE:** WG-API is currently only compatible with the WireGuard Linux kernel module and userland wireguard-go. It does not currently work with the MacOS NetworkExtension.
 
 
-## Getting WireGuard-API
+## Getting WG-API
 
 ### Pre-Built Binary
 
-Binaries for Linux are available [here](https://github.com/jamescun/wireguard-api/releases).
+Binaries for Linux are available [here](https://github.com/jamescun/wg-api/releases).
 
 ### Build Yourself
 
-WireGuard-API requires at least Go 1.13.
+WG-API requires at least Go 1.13.
 
 ```sh
-go install github.com/jamescun/wireguard-api/cmd
+go install github.com/jamescun/wg-api/cmd
 ```
 
-This should install the server binary `wireguard-api` in your $GOPATH/bin.
+This should install the server binary `wg-api` in your $GOPATH/bin.
 
 ### Docker
 
-WireGuard-API can also be run inside a Docker container, however the container will need to existing within the same network namespace as the host and have network administrator capability (CAP_NET_ADMIN) to be able to control the WireGuard interface.
+WG-API can also be run inside a Docker container, however the container will need to existing within the same network namespace as the host and have network administrator capability (CAP_NET_ADMIN) to be able to control the WireGuard interface.
 
 ```sh
-docker run --name=wireguard-api -d -p 8080:8080 --network host --cap-add NET_ADMIN james/wireguard-api:latest wireguard-api --device=<my device>
+docker run --name=wg-api -d -p 8080:8080 --network host --cap-add NET_ADMIN james/wg-api:latest wg-api --device=<my device>
 ```
 
 
-## Configuring WireGuard-API
+## Configuring WG-API
 
-WireGuard is configured using command line arguments:
+WG is configured using command line arguments:
 
 ```sh
-$ wireguard-api --help
-WireGuard-API presents a JSON-RPC API to a WireGuard device
-Usage: wireguard-api [options]
+$ wg-api --help
+WG-API presents a JSON-RPC API to a WireGuard device
+Usage: wg-api [options]
 
 Helpers:
   --list-devices  list wireguard devices on this system and their name to be
                   given to --device
-  --version       display the version number of WireGuard-API
+  --version       display the version number of WG-API
 
 Options:
   --device=<name>         (required) name of WireGuard device to manager
@@ -63,37 +63,37 @@ Options:
   --tls-client-ca         enable mutual TLS authentication (mTLS) of the client
 
 Warnings:
-  WireGuard-API can perform sensitive network operations, as such it should not
-  be publically exposed. It should be bound to the local interface only, or
+  WG-API can perform sensitive network operations, as such it should not be
+  publicly exposed. It should be bound to the local interface only, or
   failing that, be behind an authenticating proxy or have mTLS enabled.
 ```
 
-The only required argument is `--device`, which tells WireGuard-API which WireGuard device to control. To control multiple WireGuard devices, launch multiple instances of WireGuard-API.
+The only required argument is `--device`, which tells WG-API which WireGuard device to control. To control multiple WireGuard devices, launch multiple instances of WG-API.
 
-By default, this launches WireGuard-API on `localhost:8080` which may conflict with the typical development environment. To bind it elsewhere, use `--listen`:
-
-```sh
-$ wireguard-api --device=<my device> --listen=localhost:1234
-```
-
-**NOTE:** `--listen` will not prevent you from binding the server to a public interface. Care should be taken to prevent public access to the WireGuard-API server; such as binding it only to a local interface, placing an authenticating reverse proxy in-front of it or using mTLS (detailed below).
-
-WireGuard-API can optional listen using TLS and HTTP/2. To enable TLS, you will also need a TLS Certificate and matching private key.
+By default, this launches WG-API on `localhost:8080` which may conflict with the typical development environment. To bind it elsewhere, use `--listen`:
 
 ```sh
-$ wireguard-api --device=<my device> --tls --tls-key=key.pem --tls-cert=cert.pem
+$ wg-api --device=<my device> --listen=localhost:1234
 ```
 
-And optionally WireGuard-API can request and validate client certificates to implement TLS Mutual Authentication (mTLS):
+**NOTE:** `--listen` will not prevent you from binding the server to a public interface. Care should be taken to prevent public access to the WG-API server; such as binding it only to a local interface, placing an authenticating reverse proxy in-front of it or using mTLS (detailed below).
+
+WG-API can optional listen using TLS and HTTP/2. To enable TLS, you will also need a TLS Certificate and matching private key.
 
 ```sh
-$ wireguard-api --device=<my device> --tls --tls-key=key.pem --tls-cert=cert.pem --tls-client-ca=clientca.pem
+$ wg-api --device=<my device> --tls --tls-key=key.pem --tls-cert=cert.pem
+```
+
+And optionally WG-API can request and validate client certificates to implement TLS Mutual Authentication (mTLS):
+
+```sh
+$ wg-api --device=<my device> --tls --tls-key=key.pem --tls-cert=cert.pem --tls-client-ca=clientca.pem
 ```
 
 
-## Using WireGuard-API
+## Using WG-API
 
-WireGuard-API exposes a JSON-RPC 2.0 API with five methods.
+WG-API exposes a JSON-RPC 2.0 API with five methods.
 
 All calls are made using the POST method, and require the `Content-Type` header to be set to `application/json`. The server ignores the URL path it is given, allowing the server to be mounted under another hierarchy in a reverse proxy.
 

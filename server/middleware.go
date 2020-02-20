@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jamescun/wireguard-api/server/jsonrpc"
+	"github.com/jamescun/wg-api/server/jsonrpc"
 )
 
 // PreventReferer blocks any request that contains a Referer or Origin header,

@@ -7,15 +7,15 @@ import (
 	"net"
 	"time"
 
-	"github.com/jamescun/wireguard-api/client"
-	"github.com/jamescun/wireguard-api/server/jsonrpc"
+	"github.com/jamescun/wg-api/client"
+	"github.com/jamescun/wg-api/server/jsonrpc"
 
 	"golang.zx2c4.com/wireguard/wgctrl"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
-// Server is the host-side implementation of the WireGuard-API Client. It
-// supports both Kernel and Userland implementations of WireGuard.
+// Server is the host-side implementation of the WG-API Client. It supports
+// both Kernel and Userland implementations of WireGuard.
 type Server struct {
 	wg         *wgctrl.Client
 	deviceName string
@@ -313,7 +313,7 @@ func (s *Server) RemovePeer(ctx context.Context, req *client.RemovePeerRequest) 
 	return &client.RemovePeerResponse{OK: true}, nil
 }
 
-// ServeJSONRPC handles incomming WireGuard-API requests.
+// ServeJSONRPC handles incoming WG-API requests.
 func (s *Server) ServeJSONRPC(w jsonrpc.ResponseWriter, r *jsonrpc.Request) {
 	var res interface{}
 

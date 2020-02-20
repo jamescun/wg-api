@@ -10,20 +10,20 @@ import (
 	"net/http"
 	"os"
 
-	wireguardapi "github.com/jamescun/wireguard-api"
-	"github.com/jamescun/wireguard-api/server"
-	"github.com/jamescun/wireguard-api/server/jsonrpc"
+	wireguardapi "github.com/jamescun/wg-api"
+	"github.com/jamescun/wg-api/server"
+	"github.com/jamescun/wg-api/server/jsonrpc"
 
 	"golang.zx2c4.com/wireguard/wgctrl"
 )
 
-const help = `WireGuard-API presents a JSON-RPC API to a WireGuard device
-Usage: wireguard-api [options]
+const help = `WG-API presents a JSON-RPC API to a WireGuard device
+Usage: wg-api [options]
 
 Helpers:
   --list-devices  list wireguard devices on this system and their name to be
                   given to --device
-  --version       display the version number of WireGuard-API
+  --version       display the version number of WG-API
 
 Options:
   --device=<name>         (required) name of WireGuard device to manager
@@ -35,8 +35,8 @@ Options:
   --tls-client-ca         enable mutual TLS authentication (mTLS) of the client
 
 Warnings:
-  WireGuard-API can perform sensitive network operations, as such it should not
-  be publically exposed. It should be bound to the local interface only, or
+  WG-API can perform sensitive network operations, as such it should not be
+  publicly exposed. It should be bound to the local interface only, or
   failing that, be behind an authenticating proxy or have mTLS enabled.
 `
 
@@ -79,7 +79,7 @@ func main() {
 		}
 
 	case *showVersion:
-		fmt.Println("WireGuard-API Version:", wireguardapi.Version)
+		fmt.Println("WG-API Version:", wireguardapi.Version)
 
 	default:
 		client, err := wgctrl.New()
@@ -96,7 +96,7 @@ func main() {
 
 		svc, err := server.NewServer(client, device.Name)
 		if err != nil {
-			exitError("could not create WireGuard-API server: %s", err)
+			exitError("could not create WG-API server: %s", err)
 		}
 
 		s := &http.Server{
