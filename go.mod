@@ -1,4 +1,4 @@
-module github.com/jamescun/wireguard-api
+module github.com/jamescun/wg-api
 
 go 1.13
 
