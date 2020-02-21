@@ -61,11 +61,18 @@ Options:
   --tls-key               TLS private key
   --tks-cert              TLS certificate file
   --tls-client-ca         enable mutual TLS authentication (mTLS) of the client
+  --token                 opaque value provided by the client to authenticate
+                          requests. may be specified multiple times.
+
+Environment Variables:
+  WGAPI_TOKENS  comma seperated list of authentication tokens, equivalent to
+                calling --token one or more times.
 
 Warnings:
   WG-API can perform sensitive network operations, as such it should not be
   publicly exposed. It should be bound to the local interface only, or
   failing that, be behind an authenticating proxy or have mTLS enabled.
+  Additionally authentication tokens should be configured.
 ```
 
 The only required argument is `--device`, which tells WG-API which WireGuard device to control. To control multiple WireGuard devices, launch multiple instances of WG-API.
@@ -76,7 +83,22 @@ By default, this launches WG-API on `localhost:8080` which may conflict with the
 $ wg-api --device=<my device> --listen=localhost:1234
 ```
 
-**NOTE:** `--listen` will not prevent you from binding the server to a public interface. Care should be taken to prevent public access to the WG-API server; such as binding it only to a local interface, placing an authenticating reverse proxy in-front of it or using mTLS (detailed below).
+**NOTE:** `--listen` will not prevent you from binding the server to a public interface. Care should be taken to prevent public access to the WG-API server; such as binding it only to a local interface, enabling auth tokens, placing an authenticating reverse proxy in-front of it or using mTLS (detailed below).
+
+Authentication tokens can be provided either on the command line or via an environment variable. `--token` may be specified multiple times, or a comma-seperated list may be provided with the `WGAPI_TOKENS` environment variable. Environment variables are preferred as the token may be visible from process lists when using the command line `--token`.
+
+```sh
+$ WGAPI_TOKENS=<random string> wg-api --device=<my device>
+```
+
+Then provided as part of the HTTP exchange in the HTTP `Authorization` header as the `Token` scheme.
+
+```
+POST / HTTP/1.1
+Host: localhost:8080
+Authorization: Token <random string>
+Content-Type: application/json
+```
 
 WG-API can optional listen using TLS and HTTP/2. To enable TLS, you will also need a TLS Certificate and matching private key.
 
@@ -98,6 +120,8 @@ WG-API exposes a JSON-RPC 2.0 API with five methods.
 All calls are made using the POST method, and require the `Content-Type` header to be set to `application/json`. The server ignores the URL path it is given, allowing the server to be mounted under another hierarchy in a reverse proxy.
 
 The structures expected by the server can be found in [client/client.go](client/client.go).
+
+Authentication may optionally be configured. This is supplied via the `Authorization` header as the `Token` scheme. See [Configuring WG-API](##Configuring-WG-API) for an example.
 
 
 ### GetDeviceInfo

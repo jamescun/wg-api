@@ -45,6 +45,7 @@ Warnings:
   WG-API can perform sensitive network operations, as such it should not be
   publicly exposed. It should be bound to the local interface only, or
   failing that, be behind an authenticating proxy or have mTLS enabled.
+  Additionally authentication tokens should be configured.
 `
 
 var (
