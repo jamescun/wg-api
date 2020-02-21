@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,6 +13,7 @@ import (
 	"github.com/jamescun/wg-api/server"
 	"github.com/jamescun/wg-api/server/jsonrpc"
 
+	flag "github.com/spf13/pflag"
 	"golang.zx2c4.com/wireguard/wgctrl"
 )
 
