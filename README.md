@@ -93,6 +93,10 @@ $ WGAPI_TOKENS=<random string> wg-api --device=<my device>
 
 Then provided as part of the HTTP exchange in the HTTP `Authorization` header as the `Token` scheme.
 
+```sh
+$ curl http://localhost:8080 -H "Authorization: Token <random string>" ...
+```
+
 ```
 POST / HTTP/1.1
 Host: localhost:8080
