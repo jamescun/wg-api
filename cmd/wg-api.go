@@ -3,17 +3,18 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	wireguardapi "github.com/jamescun/wg-api"
 	"github.com/jamescun/wg-api/server"
 	"github.com/jamescun/wg-api/server/jsonrpc"
 
+	flag "github.com/spf13/pflag"
 	"golang.zx2c4.com/wireguard/wgctrl"
 )
 
@@ -33,11 +34,18 @@ Options:
   --tls-key               TLS private key
   --tks-cert              TLS certificate file
   --tls-client-ca         enable mutual TLS authentication (mTLS) of the client
+  --token                 opaque value provided by the client to authenticate
+                          requests. may be specified multiple times.
+
+Environment Variables:
+  WGAPI_TOKENS  comma seperated list of authentication tokens, equivalent to
+                calling --token one or more times.
 
 Warnings:
   WG-API can perform sensitive network operations, as such it should not be
   publicly exposed. It should be bound to the local interface only, or
   failing that, be behind an authenticating proxy or have mTLS enabled.
+  Additionally authentication tokens should be configured.
 `
 
 var (
@@ -52,6 +60,7 @@ var (
 	tlsKey      = flag.String("tls-key", "", "")
 	tlsCert     = flag.String("tls-cert", "", "")
 	tlsClientCA = flag.String("tls-client-ca", "", "")
+	authTokens  = flag.StringArray("token", nil, "")
 )
 
 func main() {
@@ -99,9 +108,21 @@ func main() {
 			exitError("could not create WG-API server: %s", err)
 		}
 
+		handler := jsonrpc.HTTP(server.Logger(svc))
+
+		if tokens := envArray("WGAPI_TOKENS"); len(tokens) > 0 {
+			*authTokens = append(*authTokens, tokens...)
+		}
+
+		if len(*authTokens) > 0 {
+			handler = server.AuthTokens(*authTokens...)(handler)
+		}
+
+		handler = server.PreventReferer(handler)
+
 		s := &http.Server{
 			Addr:    *listenAddr,
-			Handler: server.PreventReferer(jsonrpc.HTTP(server.Logger(svc))),
+			Handler: handler,
 		}
 
 		if *enableTLS {
@@ -156,4 +177,19 @@ func loadCertificatePool(filename string) (*x509.CertPool, error) {
 	}
 
 	return pool, nil
+}
+
+func envArray(name string) []string {
+	env := os.Getenv(name)
+	if env == "" {
+		return nil
+	}
+
+	vv := strings.Split(env, ",")
+
+	for i, v := range vv {
+		vv[i] = strings.TrimSpace(v)
+	}
+
+	return vv
 }

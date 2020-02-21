@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jamescun/wg-api/server/jsonrpc"
@@ -41,4 +42,32 @@ func Logger(next jsonrpc.Handler) jsonrpc.Handler {
 
 		log.Printf("info: request: method=%q remote_addr=%s duration=%s\n", r.Method, r.RemoteAddr(), t2.Sub(t1))
 	})
+}
+
+// AuthTokens only allows a request to continue if one of the pre-configured
+// tokens is provided by the client in the Authorization header, otherwise
+// a HTTP 403 Forbidden is returned and the request terminated.
+func AuthTokens(tokens ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Token "))
+
+			if !stringInSlice(token, tokens) {
+				http.Error(w, "forbidden", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func stringInSlice(s string, vv []string) bool {
+	for _, v := range vv {
+		if v == s {
+			return true
+		}
+	}
+
+	return false
 }
