@@ -33,6 +33,8 @@ Options:
   --tls-key               TLS private key
   --tks-cert              TLS certificate file
   --tls-client-ca         enable mutual TLS authentication (mTLS) of the client
+  --token                 opaque value provided by the client to authenticate
+                          requests. may be specified multiple times.
 
 Warnings:
   WG-API can perform sensitive network operations, as such it should not be
@@ -52,6 +54,7 @@ var (
 	tlsKey      = flag.String("tls-key", "", "")
 	tlsCert     = flag.String("tls-cert", "", "")
 	tlsClientCA = flag.String("tls-client-ca", "", "")
+	authTokens  = flag.StringArray("token", nil, "")
 )
 
 func main() {
@@ -99,9 +102,17 @@ func main() {
 			exitError("could not create WG-API server: %s", err)
 		}
 
+		handler := jsonrpc.HTTP(server.Logger(svc))
+
+		if len(*authTokens) > 0 {
+			handler = server.AuthTokens(*authTokens...)(handler)
+		}
+
+		handler = server.PreventReferer(handler)
+
 		s := &http.Server{
 			Addr:    *listenAddr,
-			Handler: server.PreventReferer(jsonrpc.HTTP(server.Logger(svc))),
+			Handler: handler,
 		}
 
 		if *enableTLS {
