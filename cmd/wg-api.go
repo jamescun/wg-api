@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	wireguardapi "github.com/jamescun/wg-api"
@@ -28,7 +30,9 @@ Helpers:
 
 Options:
   --device=<name>         (required) name of WireGuard device to manager
-  --listen=<[host:]port>  address where API server will bind
+  --listen=<[host:]port>  address where API server will bind, this can either
+                          be a [host:]port combination, or a absolute filename
+                          for a UNIX socket
                           (default localhost:8080)
   --tls                   enable Transport Layer Security (SSL) on server
   --tls-key               TLS private key
@@ -121,14 +125,17 @@ func main() {
 		handler = server.PreventReferer(handler)
 
 		s := &http.Server{
-			Addr:    *listenAddr,
 			Handler: handler,
 		}
 
 		if *enableTLS {
 			if *tlsKey == "" || *tlsCert == "" {
 				exitError("tls key and cert required for TLS")
+			} else if path.IsAbs(*listenAddr) {
+				exitError("tls can only listen on an interface")
 			}
+
+			s.Addr = *listenAddr
 
 			if *tlsClientCA != "" {
 				pool, err := loadCertificatePool(*tlsClientCA)
@@ -148,10 +155,26 @@ func main() {
 				log.Fatalln("fatal: server:", err)
 			}
 		} else {
-			log.Printf("info: server: listening on http://%s\n", s.Addr)
+			if path.IsAbs(*listenAddr) {
+				ln, err := net.Listen("unix", *listenAddr)
+				if err != nil {
+					log.Fatalln("fatal: server:", err)
+				}
+				defer ln.Close()
 
-			if err := s.ListenAndServe(); err != nil {
-				log.Fatalln("fatal: server:", err)
+				log.Printf("info: server: listening on unix://%s\n", *listenAddr)
+
+				if err := s.Serve(ln); err != nil {
+					log.Fatalln("fatal: server:", err)
+				}
+			} else {
+				s.Addr = *listenAddr
+
+				log.Printf("info: server: listening on http://%s\n", s.Addr)
+
+				if err := s.ListenAndServe(); err != nil {
+					log.Fatalln("fatal: server:", err)
+				}
 			}
 		}
 	}
