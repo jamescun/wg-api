@@ -23,7 +23,7 @@ jobs:
             TAG=${GITHUB_REF#refs/tags/}
             echo ::set-output name=version::${TAG%-*}
           else
-            echo ::set-output name=version::unstable
+            echo ::set-output name=version::latest
           fi
           echo ::set-output name=build_date::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           echo ::set-output name=docker_platforms::linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le,linux/s390x
@@ -58,7 +58,7 @@ jobs:
         run: |
           echo "${DOCKER_PASSWORD}" | docker login --username "${{ steps.prepare.outputs.docker_username }}" --password-stdin
       -
-       name: Docker Buildx [Unstable] (push)
+       name: Docker Buildx [Latest] (push)
        if: success() && github.event_name != 'pull_request'
        run: |
           docker buildx build --platform ${{ steps.prepare.outputs.docker_platforms }} \
