@@ -38,6 +38,7 @@ WG-API can also be run inside a Docker container, however the container will nee
 docker run --name=wg-api -d -p 8080:8080 --network host --cap-add NET_ADMIN james/wg-api:latest wg-api --device=<my device>
 ```
 
+The Docker container now supports Linux on AMD64, ARM64 and ARMv7 architectures.
 
 ## Configuring WG-API
 
