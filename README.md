@@ -56,7 +56,9 @@ Helpers:
 
 Options:
   --device=<name>         (required) name of WireGuard device to manager
-  --listen=<[host:]port>  address where API server will bind
+  --listen=<[host:]port>  address where API server will bind, this can either
+                          be a [host:]port combination, or a absolute filename
+                          for a UNIX socket
                           (default localhost:8080)
   --tls                   enable Transport Layer Security (SSL) on server
   --tls-key               TLS private key
@@ -78,7 +80,7 @@ Warnings:
 
 The only required argument is `--device`, which tells WG-API which WireGuard device to control. To control multiple WireGuard devices, launch multiple instances of WG-API.
 
-By default, this launches WG-API on `localhost:8080` which may conflict with the typical development environment. To bind it elsewhere, use `--listen`:
+By default, this launches WG-API on `localhost:8080` which may conflict with the typical development environment. To bind it elsewhere, use `--listen`. WG-API can either listen on a network interface, or a UNIX socket by specifying an absolute path:
 
 ```sh
 $ wg-api --device=<my device> --listen=localhost:1234
