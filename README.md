@@ -22,10 +22,10 @@ Binaries for Linux are available [here](https://github.com/jamescun/wg-api/relea
 
 ### Build Yourself
 
-WG-API requires at least Go 1.13.
+WG-API requires at least Go 1.17.
 
 ```sh
-go install github.com/jamescun/wg-api/cmd
+go install github.com/jamescun/wg-api
 ```
 
 This should install the server binary `wg-api` in your $GOPATH/bin.
