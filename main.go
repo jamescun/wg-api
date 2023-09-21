@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -65,7 +64,7 @@ var (
 )
 
 func main() {
-	flag.Usage = func() { fmt.Println(help) }
+	flag.Usage = func() { fmt.Print(help) }
 	flag.Parse()
 
 	switch {
@@ -164,7 +163,7 @@ func exitError(format string, args ...interface{}) {
 }
 
 func loadCertificatePool(filename string) (*x509.CertPool, error) {
-	pemBytes, err := ioutil.ReadFile(filename)
+	pemBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
